@@ -32,7 +32,7 @@ export default function CartPage() {
         </div>
       ))}
 
-      <p>Total: ₹{getTotalPrice()}</p>
+      <p>Total: ₹{getTotalPrice().toFixed(2)}</p>
     </div>
   );
 }
