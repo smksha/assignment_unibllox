@@ -1,6 +1,7 @@
 import { checkoutService } from "../src/services/checkout.service";
 import { cartService } from "../src/services/cart.service";
 import { memoryStore } from "../src/store/memory.store";
+import { adminService } from "../src/services/admin.service";
 
 describe("CheckoutService", () => {
   beforeEach(() => {
@@ -42,18 +43,6 @@ describe("CheckoutService", () => {
     expect(order.items).toHaveLength(1);
   });
 
-  test("generates discount code on nth order", () => {
-    // NTH_ORDER_INTERVAL = 3
-    for (let i = 0; i < 3; i++) {
-      addSampleItemToCart();
-      checkoutService.checkout();
-    }
-
-    const discounts = memoryStore.getDiscountCodes();
-    expect(discounts).toHaveLength(1);
-    expect(discounts[0].isUsed).toBe(false);
-  });
-
   test("applies valid discount code", () => {
     // Generate discount on 3rd order
     for (let i = 0; i < 3; i++) {
@@ -61,10 +50,15 @@ describe("CheckoutService", () => {
       checkoutService.checkout();
     }
 
-    const discountCode = memoryStore.getDiscountCodes()[0].code;
+    const discountCode = adminService.generateDiscountCode();
+    if ("message" in discountCode) {
+      throw new Error("Discount was expected but not generated");
+    }
+
+    // Use discount code on next order
 
     addSampleItemToCart();
-    const order = checkoutService.checkout(discountCode);
+    const order = checkoutService.checkout(discountCode.code);
 
     expect(order.discountApplied).toBe(100); // 10% of 1000
     expect(order.totalAmount).toBe(900);
@@ -77,16 +71,19 @@ describe("CheckoutService", () => {
       checkoutService.checkout();
     }
 
-    const discountCode = memoryStore.getDiscountCodes()[0].code;
+    const discountCode = adminService.generateDiscountCode();
+    if ("message" in discountCode) {
+      throw new Error("Discount was expected but not generated");
+    }
 
     // First use – SUCCESS
     addSampleItemToCart();
-    checkoutService.checkout(discountCode);
+    checkoutService.checkout(discountCode.code);
 
     // Second use – FAIL
     addSampleItemToCart();
     expect(() => {
-      checkoutService.checkout(discountCode);
+      checkoutService.checkout(discountCode.code);
     }).toThrow("Invalid or already used discount code");
   });
 
