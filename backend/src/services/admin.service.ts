@@ -6,6 +6,12 @@ class AdminService {
   // generate discount code method
 
   generateDiscountCode(): DiscountCode | { message: string } {
+    //check for existing discount code
+    const exostingCodes = memoryStore.getDiscountCodes().find((d) => !d.isUsed);
+    if (exostingCodes) {
+      return exostingCodes;
+    }
+
     const orderCount = memoryStore.getOrderCount();
 
     // Condition not satisfied
