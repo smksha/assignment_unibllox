@@ -5,7 +5,6 @@ type Props = {
   title: string;
   description: string;
   price: number;
-  quantity?: number;
   thumbnail: string;
 };
 
@@ -14,7 +13,6 @@ export default function ProductCard({
   title,
   description,
   price,
-  quantity,
   thumbnail,
 }: Props) {
   const { addToCart } = useCart();
@@ -29,8 +27,7 @@ export default function ProductCard({
       quantity: 1,
     };
 
-    console.log("Product added to cart:", product);
-
+    //console.log("Product added to cart:", product); //TO DO : remove this line later
     addToCart(product);
   };
 
@@ -45,7 +42,7 @@ export default function ProductCard({
       <p className="text-sm text-gray-600 flex-grow">{description}</p>
       <p className="mt-2 font-bold text-black">₹{price}</p>
       <button
-        onClick={() => handleAddToCart()}
+        onClick={handleAddToCart}
         className="mt-2 px-3 py-1 bg-blue-600 text-white rounded"
       >
         Add to cart

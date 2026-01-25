@@ -1,7 +1,7 @@
 import { useCart } from "../context/CartContext";
 
 export default function CartPage() {
-  const { cartItems, addToCart, removeFromCart } = useCart();
+  const { cartItems, addToCart, removeFromCart, getTotalPrice } = useCart();
 
   if (cartItems.length === 0) {
     return <p className="p-4">Your cart is empty.</p>;
@@ -14,29 +14,25 @@ export default function CartPage() {
       {cartItems.map((item) => (
         <div
           key={item.id}
-          className="flex items-center justify-between bg-white p-3 rounded shadow"
+          className="flex items-center gap-4 bg-white p-3 rounded shadow"
         >
-          <div>
-            <p className="font-medium">Product ID: {item.id}</p>
-            <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-          </div>
+          <p>{item.title}</p>
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => removeFromCart(item.id)}
-              className="px-2 py-1 bg-gray-200 rounded"
-            >
-              −
-            </button>
-            <button
-              onClick={() => addToCart({ ...item, quantity: 1 })}
-              className="px-2 py-1 bg-blue-600 text-white rounded"
-            >
-              +
-            </button>
-          </div>
+          <img
+            src={item.thumbnail}
+            alt={item.title}
+            className="w-16 h-16 object-cover rounded"
+          />
+          <p>
+            ₹{item.price} × {item.quantity}
+          </p>
+
+          <button onClick={() => removeFromCart(item.id)}>-</button>
+          <button onClick={() => addToCart({ ...item, quantity: 1 })}>+</button>
         </div>
       ))}
+
+      <p>Total: ₹{getTotalPrice()}</p>
     </div>
   );
 }
