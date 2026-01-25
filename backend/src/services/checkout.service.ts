@@ -1,6 +1,5 @@
 import { memoryStore, CartItem, Order } from "../store/memory.store";
 
-const NTH_ORDER_INTERVAL = 3; //  generate discount code every 3rd orders
 const DISCOUNT_PERCENT = 0.1; // 10% discount
 
 class CheckoutService {
@@ -43,8 +42,6 @@ class CheckoutService {
     memoryStore.addOrder(order);
     memoryStore.clearCart();
 
-    this.maybeGenerateDiscountCode();
-
     return order;
   }
 
@@ -56,22 +53,6 @@ class CheckoutService {
 
   private calculateDiscount(subtotal: number): number {
     return Number((subtotal * DISCOUNT_PERCENT).toFixed(2));
-  }
-
-  private maybeGenerateDiscountCode(): void {
-    const orderCount = memoryStore.getOrderCount();
-
-    if (orderCount % NTH_ORDER_INTERVAL !== 0) {
-      return;
-    }
-
-    const code = `DISCOUNT_${orderCount}`;
-
-    memoryStore.addDiscountCode({
-      code,
-      isUsed: false,
-      createdAt: new Date(),
-    });
   }
 }
 
