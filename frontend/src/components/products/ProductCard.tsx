@@ -1,5 +1,7 @@
-// src/components/product/ProductCard.tsx
+import { useCart } from "../../context/CartContext";
+
 type Props = {
+  id: number;
   title: string;
   description: string;
   price: number;
@@ -7,11 +9,14 @@ type Props = {
 };
 
 export default function ProductCard({
+  id,
   title,
   description,
   price,
   thumbnail,
 }: Props) {
+  const { addToCart } = useCart();
+
   return (
     <div className="bg-white p-4 rounded shadow flex flex-col">
       <img
@@ -22,7 +27,10 @@ export default function ProductCard({
       <h3 className="font-semibold">{title}</h3>
       <p className="text-sm text-gray-600 flex-grow">{description}</p>
       <p className="mt-2 font-bold text-black">₹{price}</p>
-      <button className="mt-2 px-3 py-1 bg-blue-600 text-white rounded">
+      <button
+        onClick={() => addToCart(id)}
+        className="mt-2 px-3 py-1 bg-blue-600 text-white rounded"
+      >
         Add to cart
       </button>
     </div>
