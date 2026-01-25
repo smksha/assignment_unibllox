@@ -1,15 +1,24 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  type ReactNode,
+  useCallback,
+} from "react";
 
 type CartItem = {
   id: number;
+  title: string;
+  price: number;
   quantity: number;
 };
 
 type CartContextType = {
   cartItems: CartItem[];
-  addToCart: (id: number) => void;
+  addToCart: (item: CartItem) => void;
   removeFromCart: (id: number) => void;
   getItemQuantity: (id: number) => number;
+  getTotalPrice: () => number;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -21,18 +30,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return cartItems.find((item) => item.id === id)?.quantity ?? 0;
   };
 
-  const addToCart = (id: number) => {
-    setCartItems((prevItems) => {
-      const item = prevItems.find((item) => item.id === id);
-      if (item) {
-        return prevItems.map((item) =>
-          item.id === id ? { ...item, quantity: item.quantity + 1 } : item,
-        );
-      } else {
-        return [...prevItems, { id, quantity: 1 }];
-      }
+  const addToCart = useCallback((item: CartItem) => {
+    setCartItems((prev) => {
+      const existing = prev.find((i) => i.id === item.id);
+      if (!existing) return [...prev, item];
+
+      return prev.map((i) =>
+        i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i,
+      );
     });
-  };
+  }, []);
 
   const removeFromCart = (id: number) => {
     setCartItems((prevItems) =>
@@ -44,9 +51,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const getTotalPrice = () => {
+    return cartItems.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0,
+    );
+  };
+
   return (
     <CartContext.Provider
-      value={{ cartItems, addToCart, removeFromCart, getItemQuantity }}
+      value={{
+        cartItems,
+        addToCart,
+        removeFromCart,
+        getItemQuantity,
+        getTotalPrice,
+      }}
     >
       {children}
     </CartContext.Provider>

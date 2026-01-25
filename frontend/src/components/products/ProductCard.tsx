@@ -5,6 +5,7 @@ type Props = {
   title: string;
   description: string;
   price: number;
+  quantity?: number;
   thumbnail: string;
 };
 
@@ -13,6 +14,7 @@ export default function ProductCard({
   title,
   description,
   price,
+  quantity,
   thumbnail,
 }: Props) {
   const { addToCart } = useCart();
@@ -24,11 +26,12 @@ export default function ProductCard({
       description,
       price,
       thumbnail,
+      quantity: 1,
     };
 
     console.log("Product added to cart:", product);
 
-    addToCart(id);
+    addToCart(product);
   };
 
   return (
