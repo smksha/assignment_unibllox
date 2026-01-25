@@ -38,9 +38,7 @@ class CartService {
 
     const updatedCart = cart
       .map((item) =>
-        item.productId === productId
-          ? { ...item, quantity: item.quantity - 1 }
-          : item,
+        item.id === productId ? { ...item, quantity: item.quantity - 1 } : item,
       )
       .filter((item) => item.quantity > 0);
 
@@ -55,8 +53,8 @@ class CartService {
   //validation method
 
   private validateItem(item: CartItem) {
-    if (!item.productId) {
-      throw new Error("productId is required");
+    if (!item.id) {
+      throw new Error("id is required");
     }
 
     if (item.quantity <= 0) {
