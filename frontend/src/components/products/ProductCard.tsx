@@ -17,6 +17,20 @@ export default function ProductCard({
 }: Props) {
   const { addToCart } = useCart();
 
+  const handleAddToCart = () => {
+    const product = {
+      id,
+      title,
+      description,
+      price,
+      thumbnail,
+    };
+
+    console.log("Product added to cart:", product);
+
+    addToCart(id);
+  };
+
   return (
     <div className="bg-white p-4 rounded shadow flex flex-col">
       <img
@@ -28,7 +42,7 @@ export default function ProductCard({
       <p className="text-sm text-gray-600 flex-grow">{description}</p>
       <p className="mt-2 font-bold text-black">₹{price}</p>
       <button
-        onClick={() => addToCart(id)}
+        onClick={() => handleAddToCart()}
         className="mt-2 px-3 py-1 bg-blue-600 text-white rounded"
       >
         Add to cart
