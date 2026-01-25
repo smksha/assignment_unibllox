@@ -7,9 +7,9 @@ class AdminService {
 
   generateDiscountCode(): DiscountCode | { message: string } {
     //check for existing discount code
-    const exostingCodes = memoryStore.getDiscountCodes().find((d) => !d.isUsed);
-    if (exostingCodes) {
-      return exostingCodes;
+    const existingCode = memoryStore.getDiscountCodes().find((d) => !d.isUsed);
+    if (existingCode) {
+      return existingCode;
     }
 
     const orderCount = memoryStore.getOrderCount();
