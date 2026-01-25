@@ -1,15 +1,20 @@
-import "./App.css";
+import Header from "./components/layout/Header";
+import Footer from "./components/layout/Footer";
+import ProductListPage from "./pages/ProductListPage";
 
-function App() {
+export default function App() {
   return (
-    <>
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <h1 className="text-3xl font-bold text-blue-600">
-          Tailwind is working 🚀
-        </h1>
-      </div>
-    </>
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      {/* Header */}
+      <Header />
+
+      {/* Products Content */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <ProductListPage />
+      </main>
+
+      {/* Footer */}
+      <Footer />
+    </div>
   );
 }
-
-export default App;
