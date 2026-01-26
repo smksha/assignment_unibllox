@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import { fetchAvailableDiscount } from "../api/admin";
 import { checkout } from "../api/checkout";
+import { useNavigate } from "react-router-dom";
 
 export default function CartPage() {
   const [discountCode, setDiscountCode] = useState<string | undefined>(
@@ -12,6 +13,8 @@ export default function CartPage() {
 
   const { cartItems, addToCart, removeFromCart, getTotalPrice } = useCart();
 
+  const navigate = useNavigate();
+
   // Fetch available discount from admin API
   useEffect(() => {
     fetchAvailableDiscount().then((res) => {
@@ -20,16 +23,6 @@ export default function CartPage() {
       }
     });
   }, []);
-
-  //   const handleCheckout = async () => {
-  //     try {
-  //       const order = await checkout(discountCode); // optional
-  //       alert("Order placed successfully!");
-  //       console.log(order);
-  //     } catch (err: any) {
-  //       alert(err.message);
-  //     }
-  //   };
 
   if (cartItems.length === 0) {
     return <p className="p-4">Your cart is empty.</p>;
@@ -42,6 +35,12 @@ export default function CartPage() {
 
   return (
     <div className="p-4 space-y-4">
+      <button
+        onClick={() => navigate("/")}
+        className="mb-4 text-blue-600 underline"
+      >
+        ← Back to products
+      </button>
       <h2 className="text-xl font-bold">Your Cart</h2>
 
       {cartItems.map((item) => (
