@@ -5,28 +5,43 @@ const NTH_ORDER_INTERVAL = Number(process.env.NTH_ORDER_INTERVAL) || 3;
 
 class AdminService {
   // generate discount code method
+
   generateDiscountCode(): DiscountCode | { message: string } {
-    // 1Return existing unused discount
+    const interval = Number(process.env.NTH_ORDER_INTERVAL) || 2;
+
+    //For Discount on First Order Only
+    if (interval === 1) {
+      // Already generated once => never again
+      if (memoryStore.hasFirstOrderDiscountGenerated()) {
+        return { message: "Discount not available" };
+      }
+
+      const nextOrderNumber = memoryStore.getNextOrderNumber();
+
+      // Discount only before first order
+      if (nextOrderNumber !== 1) {
+        return { message: "Discount not available" };
+      }
+
+      const code: DiscountCode = {
+        code: "WELCOME_DISCOUNT",
+        isUsed: false,
+        createdAt: new Date(),
+      };
+
+      memoryStore.addDiscountCode(code);
+      memoryStore.markFirstOrderDiscountGenerated();
+      return code;
+    }
+
+    // Return existing unused discount
     const existing = memoryStore.getDiscountCodes().find((d) => !d.isUsed);
 
     if (existing) {
       return existing;
     }
 
-    const interval = Number(process.env.NTH_ORDER_INTERVAL) || 2;
     const nextOrderNumber = memoryStore.getNextOrderNumber();
-
-    //  N = 1 → first order of each cycle
-    if (interval === 1) {
-      const code: DiscountCode = {
-        code: `DISCOUNT_${nextOrderNumber}`,
-        isUsed: false,
-        createdAt: new Date(),
-      };
-
-      memoryStore.addDiscountCode(code);
-      return code;
-    }
 
     // N > 1
     if (nextOrderNumber % interval !== 0) {
@@ -36,7 +51,7 @@ class AdminService {
     }
 
     const code: DiscountCode = {
-      code: `DISCOUNT_${nextOrderNumber}`,
+      code: `UNIBLOX_${nextOrderNumber}`,
       isUsed: false,
       createdAt: new Date(),
     };

@@ -59,6 +59,19 @@ class MemoryStore {
 
   // discount code methods
 
+  //case for 1st order discount
+  private firstOrderDiscountGenerated = false;
+
+  hasFirstOrderDiscountGenerated() {
+    return this.firstOrderDiscountGenerated;
+  }
+
+  markFirstOrderDiscountGenerated() {
+    this.firstOrderDiscountGenerated = true;
+  }
+
+  //for general discount codes
+
   getDiscountCodes(): DiscountCode[] {
     return this.discountCodes;
   }
