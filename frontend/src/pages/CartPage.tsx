@@ -1,16 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
+import { fetchAvailableDiscount } from "../api/admin";
+import { checkout } from "../api/checkout";
 
 export default function CartPage() {
-  const [discountCode, setDiscountCode] = useState<string | null>(null);
+  const [discountCode, setDiscountCode] = useState<string | undefined>(
+    undefined,
+  );
   const [discountApplied, setDiscountApplied] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const { cartItems, addToCart, removeFromCart, getTotalPrice } = useCart();
 
+  // Fetch available discount from admin API
+  useEffect(() => {
+    fetchAvailableDiscount().then((res) => {
+      if ("code" in res) {
+        setDiscountCode(res.code);
+      }
+    });
+  }, []);
+
+  //   const handleCheckout = async () => {
+  //     try {
+  //       const order = await checkout(discountCode); // optional
+  //       alert("Order placed successfully!");
+  //       console.log(order);
+  //     } catch (err: any) {
+  //       alert(err.message);
+  //     }
+  //   };
+
   if (cartItems.length === 0) {
     return <p className="p-4">Your cart is empty.</p>;
   }
+
+  //Calculate price after discount
+  const totalPrice = getTotalPrice();
+  const discountAmount = discountApplied ? totalPrice * 0.1 : 0; // 10% discount
+  const finalPrice = totalPrice - discountAmount;
 
   return (
     <div className="p-4 space-y-4">
@@ -36,8 +64,53 @@ export default function CartPage() {
           <button onClick={() => addToCart({ ...item, quantity: 1 })}>+</button>
         </div>
       ))}
+      {/**Discount Code Section */}
+      {discountCode && !discountApplied && (
+        <div className="p-3 bg-green-50 border rounded">
+          <p>
+            Discount Code: <strong>{discountCode}</strong>
+          </p>
+          <button
+            className="mt-2 px-3 py-1 bg-green-600 text-white rounded"
+            onClick={() => setDiscountApplied(true)}
+          >
+            Apply Discount
+          </button>
+        </div>
+      )}
+      {/**Price Calculation */}
+      <div className="space-y-1">
+        <p>Subtotal: ₹{totalPrice.toFixed(2)}</p>
+        {discountApplied && (
+          <p className="text-green-700">
+            Discount Applied : −₹{discountAmount.toFixed(2)}
+          </p>
+        )}
+        <p className="font-bold text-lg">
+          Total Payable: ₹{totalPrice.toFixed(2)}
+        </p>
+      </div>
+      <p>Total: ₹{finalPrice.toFixed(2)}</p>
 
-      <p>Total: ₹{getTotalPrice().toFixed(2)}</p>
+      {/**Checkout Button */}
+      <button
+        disabled={cartItems.length === 0 || loading}
+        className="w-full py-2 bg-blue-600 text-white rounded"
+        onClick={async () => {
+          try {
+            setLoading(true);
+            await checkout(discountApplied ? discountCode! : undefined);
+            alert("Order placed successfully");
+            window.location.reload();
+          } catch (err: any) {
+            alert(err.message);
+          } finally {
+            setLoading(false);
+          }
+        }}
+      >
+        Checkout
+      </button>
     </div>
   );
 }

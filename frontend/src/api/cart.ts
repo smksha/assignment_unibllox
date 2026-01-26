@@ -1,6 +1,6 @@
 import { apiFetch } from "./client";
 
-export type CartItem = {
+export type ApiCartItem = {
   id: number;
   title: string;
   price: number;
@@ -8,18 +8,18 @@ export type CartItem = {
 };
 
 export function fetchCart() {
-  return apiFetch<CartItem[]>("/cart");
+  return apiFetch<ApiCartItem[]>("/cart");
 }
 
-export function addToCart(item: CartItem) {
-  return apiFetch<CartItem[]>("/cart/add", {
+export function addToCart(item: ApiCartItem) {
+  return apiFetch<ApiCartItem[]>("/cart/add", {
     method: "POST",
     body: JSON.stringify(item),
   });
 }
 
 export function removeFromCart(id: number) {
-  return apiFetch<CartItem[]>("/cart/remove", {
+  return apiFetch<ApiCartItem[]>("/cart/remove", {
     method: "POST",
     body: JSON.stringify({ id }),
   });

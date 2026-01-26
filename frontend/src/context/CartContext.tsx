@@ -3,8 +3,9 @@ import {
   useContext,
   useState,
   type ReactNode,
-  useCallback,
+  useEffect,
 } from "react";
+import * as cartApi from "../api/cart";
 
 type CartItem = {
   id: number;
@@ -18,7 +19,7 @@ type CartContextType = {
   cartItems: CartItem[];
   addToCart: (item: CartItem) => void;
   removeFromCart: (id: number) => void;
-  getItemQuantity: (id: number) => number;
+  //getItemQuantity: (id: number) => number;
   getTotalPrice: () => number;
 };
 
@@ -27,6 +28,50 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
+  useEffect(() => {
+    cartApi.fetchCart().then((apiItems) => {
+      const uiItems: CartItem[] = apiItems.map((item) => ({
+        ...item,
+        thumbnail: "", // Placeholder, as API doesn't provide thumbnail
+      }));
+
+      setCartItems(uiItems);
+    });
+  }, []);
+
+  const addToCart = async (item: cartApi.ApiCartItem) => {
+    const updated = await cartApi.addToCart(item);
+
+    setCartItems(
+      updated.map((i) => ({
+        ...i,
+        thumbnail: "",
+      })),
+    );
+  };
+
+  const removeFromCart = async (id: number) => {
+    const updated = await cartApi.removeFromCart(id);
+
+    setCartItems(
+      updated.map((i) => ({
+        ...i,
+        thumbnail: "",
+      })),
+    );
+  };
+
+  const getTotalPrice = () =>
+    cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  return (
+    <CartContext.Provider
+      value={{ cartItems, addToCart, removeFromCart, getTotalPrice }}
+    >
+      {children}
+    </CartContext.Provider>
+  );
+  /*
   const getItemQuantity = (id: number) => {
     return cartItems.find((item) => item.id === id)?.quantity ?? 0;
   };
@@ -58,20 +103,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
       0,
     );
   };
-
   return (
     <CartContext.Provider
-      value={{
-        cartItems,
-        addToCart,
-        removeFromCart,
-        getItemQuantity,
-        getTotalPrice,
-      }}
+      value={{ cartItems, addToCart, removeFromCart, getTotalPrice }}
     >
       {children}
     </CartContext.Provider>
   );
+*/
 }
 export function useCart() {
   const context = useContext(CartContext);
