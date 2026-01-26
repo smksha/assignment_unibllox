@@ -35,29 +35,45 @@ export function CartProvider({ children }: { children: ReactNode }) {
         thumbnail: item.thumbnail,
       }));
 
-      setCartItems(uiItems);
+      setCartItems((prev) =>
+        uiItems.map((item) => {
+          const existing = prev.find((p) => p.id === item.id);
+
+          return {
+            ...item,
+            thumbnail: existing?.thumbnail || item.thumbnail,
+          };
+        }),
+      );
     });
   }, []);
 
   const addToCart = async (item: cartApi.ApiCartItem) => {
     const updated = await cartApi.addToCart(item);
 
-    setCartItems(
-      updated.map((i) => ({
-        ...i,
-        thumbnail: item.thumbnail,
-      })),
+    setCartItems((prev) =>
+      updated.map((i) => {
+        const existing = prev.find((p) => p.id === i.id);
+
+        return {
+          ...i,
+          thumbnail: existing?.thumbnail || i.thumbnail,
+        };
+      }),
     );
   };
 
   const removeFromCart = async (id: number) => {
     const updated = await cartApi.removeFromCart(id);
+    setCartItems((prev) =>
+      updated.map((item) => {
+        const existing = prev.find((p) => p.id === item.id);
 
-    setCartItems(
-      updated.map((i) => ({
-        ...i,
-        thumbnail: i.thumbnail,
-      })),
+        return {
+          ...item,
+          thumbnail: existing?.thumbnail || item.thumbnail,
+        };
+      }),
     );
   };
 

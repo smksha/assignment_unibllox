@@ -103,6 +103,38 @@ describe("AdminService", () => {
 
     expect(newDiscount).not.toEqual(discount);
   });
+  test("N=1: discount is available after first order", () => {
+    process.env.NTH_ORDER_INTERVAL = "1";
+
+    cartService.addItem({
+      id: 1,
+      title: "Item",
+      price: 100,
+      quantity: 1,
+    });
+    checkoutService.checkout();
+
+    const result = adminService.generateDiscountCode();
+    expect("code" in result).toBe(true);
+  });
+
+  test("N=1: discount does not regenerate until previous is used", () => {
+    process.env.NTH_ORDER_INTERVAL = "1";
+
+    // first order
+    cartService.addItem({ id: 1, title: "Item", price: 100, quantity: 1 });
+    checkoutService.checkout();
+
+    const first = adminService.generateDiscountCode();
+
+    // second order without using discount
+    cartService.addItem({ id: 2, title: "Item 2", price: 200, quantity: 1 });
+    checkoutService.checkout();
+
+    const second = adminService.generateDiscountCode();
+
+    expect(first).toEqual(second);
+  });
 
   test("returns correct admin stats", () => {
     // Order 1

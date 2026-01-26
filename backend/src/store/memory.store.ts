@@ -77,6 +77,9 @@ class MemoryStore {
       discount.isUsed = true;
     }
   }
+  getNextOrderNumber() {
+    return this.orderCount + 1;
+  }
 }
 
 export const memoryStore = new MemoryStore();

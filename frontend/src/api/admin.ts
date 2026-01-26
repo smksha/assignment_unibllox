@@ -11,3 +11,7 @@ export function fetchAvailableDiscount() {
     method: "POST",
   });
 }
+
+export function fetchOrderInfo() {
+  return apiFetch<{ nextOrderNumber: number }>("/admin/order-info");
+}

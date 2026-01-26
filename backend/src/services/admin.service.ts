@@ -1,34 +1,42 @@
 import { memoryStore, DiscountCode } from "../store/memory.store";
 
-const NTH_ORDER_INTERVAL = 3; // generates a discount code for every 3rd order
+const NTH_ORDER_INTERVAL = Number(process.env.NTH_ORDER_INTERVAL) || 3;
+// generates a discount code for every 3rd order
 
 class AdminService {
   // generate discount code method
-
   generateDiscountCode(): DiscountCode | { message: string } {
-    //check for existing discount code
-    const existingCode = memoryStore.getDiscountCodes().find((d) => !d.isUsed);
-    if (existingCode) {
-      return existingCode;
-    }
-
-    const orderCount = memoryStore.getOrderCount();
-
-    // Condition not satisfied
-    if (orderCount === 0 || orderCount % NTH_ORDER_INTERVAL !== 0) {
-      return { message: "Discount not available yet" };
-    }
-
-    // If an unused discount already exists, return it
+    // 1Return existing unused discount
     const existing = memoryStore.getDiscountCodes().find((d) => !d.isUsed);
 
     if (existing) {
       return existing;
     }
 
-    // Generate exactly ONE discount code
+    const interval = Number(process.env.NTH_ORDER_INTERVAL) || 2;
+    const nextOrderNumber = memoryStore.getNextOrderNumber();
+
+    //  N = 1 → first order of each cycle
+    if (interval === 1) {
+      const code: DiscountCode = {
+        code: `DISCOUNT_${nextOrderNumber}`,
+        isUsed: false,
+        createdAt: new Date(),
+      };
+
+      memoryStore.addDiscountCode(code);
+      return code;
+    }
+
+    // N > 1
+    if (nextOrderNumber % interval !== 0) {
+      return {
+        message: `Discount available on every ${interval}th order`,
+      };
+    }
+
     const code: DiscountCode = {
-      code: `DISCOUNT_${orderCount}`,
+      code: `DISCOUNT_${nextOrderNumber}`,
       isUsed: false,
       createdAt: new Date(),
     };

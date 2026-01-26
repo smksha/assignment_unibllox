@@ -1,6 +1,6 @@
 import { memoryStore, CartItem, Order } from "../store/memory.store";
 
-const DISCOUNT_PERCENT = 0.1; // 10% discount
+const DISCOUNT_PERCENT = Number(process.env.DISCOUNT_PERCENT) || 10; // 10% discount
 
 class CheckoutService {
   checkout(discountCode?: string): Order {
@@ -52,7 +52,7 @@ class CheckoutService {
   }
 
   private calculateDiscount(subtotal: number): number {
-    return Number((subtotal * DISCOUNT_PERCENT).toFixed(2));
+    return Number((subtotal * DISCOUNT_PERCENT) / 100);
   }
 }
 

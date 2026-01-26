@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
-import { fetchAvailableDiscount } from "../api/admin";
+import { fetchAvailableDiscount, fetchOrderInfo } from "../api/admin";
 import { checkout } from "../api/checkout";
 import { useNavigate } from "react-router-dom";
 
@@ -10,16 +10,29 @@ export default function CartPage() {
   );
   const [discountApplied, setDiscountApplied] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [orderNumber, setOrderNumber] = useState<number | null>(null);
+  const [discountMessage, setDiscountMessage] = useState<string | null>(null);
 
   const { cartItems, addToCart, removeFromCart, getTotalPrice } = useCart();
 
   const navigate = useNavigate();
+  const DISCOUNT_PERCENT = Number(import.meta.env.VITE_DISCOUNT_PERCENT);
+
+  //fetch order number
+
+  useEffect(() => {
+    fetchOrderInfo().then((res) => {
+      setOrderNumber(res.nextOrderNumber);
+    });
+  }, []);
 
   // Fetch available discount from admin API
   useEffect(() => {
     fetchAvailableDiscount().then((res) => {
       if ("code" in res) {
         setDiscountCode(res.code);
+      } else {
+        setDiscountMessage(res.message);
       }
     });
   }, []);
@@ -30,7 +43,10 @@ export default function CartPage() {
 
   //Calculate price after discount
   const totalPrice = getTotalPrice();
-  const discountAmount = discountApplied ? totalPrice * 0.1 : 0; // 10% discount
+  const discountAmount = discountApplied
+    ? (totalPrice * DISCOUNT_PERCENT) / 100
+    : 0;
+  // 10% discount
   const finalPrice = totalPrice - discountAmount;
 
   return (
@@ -42,7 +58,13 @@ export default function CartPage() {
         ← Back to products
       </button>
       <h2 className="text-xl font-bold">Your Cart</h2>
-
+      {orderNumber && (
+        <p className="text-sm text-gray-600">
+          This is your{" "}
+          <strong>{orderNumber === 1 ? "1st" : `${orderNumber}th`}</strong>{" "}
+          order
+        </p>
+      )}
       {cartItems.map((item) => (
         <div
           key={item.id}
@@ -66,8 +88,11 @@ export default function CartPage() {
       {/**Discount Code Section */}
       {discountCode && !discountApplied && (
         <div className="p-3 bg-green-50 border rounded">
+          {discountMessage && !discountCode && (
+            <p className="text-sm text-gray-500">{discountMessage}</p>
+          )}
           <p>
-            Discount Code: <strong>{discountCode}</strong>
+            Discount Code ({DISCOUNT_PERCENT}%): <strong>{discountCode}</strong>
           </p>
           <button
             className="mt-2 px-3 py-1 bg-green-600 text-white rounded"
