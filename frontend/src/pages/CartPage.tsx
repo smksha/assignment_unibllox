@@ -86,11 +86,11 @@ export default function CartPage() {
         </div>
       ))}
       {/**Discount Code Section */}
+      {discountMessage && !discountCode && (
+        <p className="text-sm text-gray-500">{discountMessage}</p>
+      )}
       {discountCode && !discountApplied && (
         <div className="p-3 bg-green-50 border rounded">
-          {discountMessage && !discountCode && (
-            <p className="text-sm text-gray-500">{discountMessage}</p>
-          )}
           <p>
             Discount Code ({DISCOUNT_PERCENT}%): <strong>{discountCode}</strong>
           </p>
@@ -111,10 +111,9 @@ export default function CartPage() {
           </p>
         )}
         <p className="font-bold text-lg">
-          Total Payable: ₹{totalPrice.toFixed(2)}
+          Total Payable: ₹{finalPrice.toFixed(2)}
         </p>
       </div>
-      <p>Total: ₹{finalPrice.toFixed(2)}</p>
 
       {/**Checkout Button */}
       <button
