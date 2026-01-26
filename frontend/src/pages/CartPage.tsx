@@ -1,6 +1,11 @@
+import { useState } from "react";
 import { useCart } from "../context/CartContext";
 
 export default function CartPage() {
+  const [discountCode, setDiscountCode] = useState<string | null>(null);
+  const [discountApplied, setDiscountApplied] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const { cartItems, addToCart, removeFromCart, getTotalPrice } = useCart();
 
   if (cartItems.length === 0) {
