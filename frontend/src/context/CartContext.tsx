@@ -32,7 +32,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     cartApi.fetchCart().then((apiItems) => {
       const uiItems: CartItem[] = apiItems.map((item) => ({
         ...item,
-        thumbnail: "", // Placeholder, as API doesn't provide thumbnail
+        thumbnail: item.thumbnail,
       }));
 
       setCartItems(uiItems);
@@ -45,7 +45,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCartItems(
       updated.map((i) => ({
         ...i,
-        thumbnail: "",
+        thumbnail: item.thumbnail,
       })),
     );
   };
@@ -56,7 +56,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCartItems(
       updated.map((i) => ({
         ...i,
-        thumbnail: "",
+        thumbnail: i.thumbnail,
       })),
     );
   };

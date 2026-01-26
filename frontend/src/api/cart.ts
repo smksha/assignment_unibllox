@@ -5,6 +5,7 @@ export type ApiCartItem = {
   title: string;
   price: number;
   quantity: number;
+  thumbnail: string;
 };
 
 export function fetchCart() {
