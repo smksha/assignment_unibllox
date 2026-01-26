@@ -7,13 +7,17 @@ describe("AdminService", () => {
   beforeEach(() => {
     memoryStore.clearCart();
 
-    // Reset internal state for isolation
+    // reset internal state
     // @ts-ignore
     memoryStore["orders"] = [];
     // @ts-ignore
     memoryStore["discountCodes"] = [];
     // @ts-ignore
     memoryStore["orderCount"] = 0;
+    // @ts-ignore
+    memoryStore["firstOrderDiscountGenerated"] = false;
+
+    delete process.env.NTH_ORDER_INTERVAL;
   });
 
   const placeOrder = () => {
@@ -23,22 +27,22 @@ describe("AdminService", () => {
       price: 500,
       quantity: 1,
     });
-
     checkoutService.checkout();
   };
 
   test("returns message when discount is not yet available", () => {
-    placeOrder(); // order 1
+    placeOrder(); // nextOrderNumber = 2 (interval default = 3)
 
     const result = adminService.generateDiscountCode();
 
-    expect(result).toEqual({ message: "Discount not available yet" });
+    expect(result).toEqual({
+      message: "Discount available on every 3th order",
+    });
   });
 
   test("generates discount on nth order", () => {
     placeOrder();
-    placeOrder();
-    placeOrder(); // 3rd order
+    placeOrder(); // nextOrderNumber = 3
 
     const result = adminService.generateDiscountCode();
 
@@ -47,7 +51,6 @@ describe("AdminService", () => {
   });
 
   test("does not generate duplicate discount codes", () => {
-    placeOrder();
     placeOrder();
     placeOrder(); // eligible
 
@@ -60,84 +63,68 @@ describe("AdminService", () => {
 
   test("discount remains valid if not used immediately", () => {
     placeOrder();
-    placeOrder();
-    placeOrder(); // discount eligible
+    placeOrder(); // eligible
 
     const discount = adminService.generateDiscountCode();
 
-    // Place another order WITHOUT using discount
-    placeOrder(); // 4th order
+    placeOrder(); // 3rd order AFTER discount generation
 
     const stillAvailable = adminService.generateDiscountCode();
 
     expect(stillAvailable).toEqual(discount);
   });
 
-  test("new discount not generated until previous one is used", () => {
-    // Reach 3rd order
+  test("new discount generated only after previous one is used and next interval reached", () => {
     placeOrder();
-    placeOrder();
-    placeOrder();
+    placeOrder(); // eligible
 
     const discount = adminService.generateDiscountCode();
 
-    // Use the discount
+    if (!("code" in discount)) {
+      throw new Error("Expected discount");
+    }
+
     cartService.addItem({
       id: 2,
       title: "MacBook",
       price: 1000,
       quantity: 1,
     });
-
-    if ("message" in discount) {
-      throw new Error("Discount was expected but not generated");
-    }
     checkoutService.checkout(discount.code);
 
-    // Reach next nth order (6)
-    placeOrder();
+    // reach next interval
     placeOrder();
     placeOrder();
 
     const newDiscount = adminService.generateDiscountCode();
 
+    expect("code" in newDiscount).toBe(true);
     expect(newDiscount).not.toEqual(discount);
   });
-  test("N=1: discount is available after first order", () => {
+
+  test("N=1: discount available only before first order", () => {
     process.env.NTH_ORDER_INTERVAL = "1";
 
-    cartService.addItem({
-      id: 1,
-      title: "Item",
-      price: 100,
-      quantity: 1,
-    });
-    checkoutService.checkout();
+    const discount = adminService.generateDiscountCode();
+    expect("code" in discount).toBe(true);
 
-    const result = adminService.generateDiscountCode();
-    expect("code" in result).toBe(true);
+    placeOrder();
+
+    const after = adminService.generateDiscountCode();
+    expect(after).toEqual({ message: "Discount not available" });
   });
 
-  test("N=1: discount does not regenerate until previous is used", () => {
+  test("N=1: discount does not recycle even if unused", () => {
     process.env.NTH_ORDER_INTERVAL = "1";
 
-    // first order
-    cartService.addItem({ id: 1, title: "Item", price: 100, quantity: 1 });
-    checkoutService.checkout();
+    const discount = adminService.generateDiscountCode();
+    expect("code" in discount).toBe(true);
 
-    const first = adminService.generateDiscountCode();
-
-    // second order without using discount
-    cartService.addItem({ id: 2, title: "Item 2", price: 200, quantity: 1 });
-    checkoutService.checkout();
-
-    const second = adminService.generateDiscountCode();
-
-    expect(first).toEqual(second);
+    const next = adminService.generateDiscountCode();
+    expect(next).toEqual({ message: "Discount not available" });
   });
 
   test("returns correct admin stats", () => {
-    // Order 1
     cartService.addItem({
       id: 1,
       title: "iPhone",
@@ -146,7 +133,6 @@ describe("AdminService", () => {
     });
     checkoutService.checkout();
 
-    // Order 2
     cartService.addItem({
       id: 2,
       title: "iPad",

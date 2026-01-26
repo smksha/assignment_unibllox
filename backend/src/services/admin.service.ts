@@ -3,11 +3,11 @@ import { memoryStore, DiscountCode } from "../store/memory.store";
 const NTH_ORDER_INTERVAL = Number(process.env.NTH_ORDER_INTERVAL) || 3;
 // generates a discount code for every 3rd order
 
-class AdminService {
+export class AdminService {
   // generate discount code method
 
   generateDiscountCode(): DiscountCode | { message: string } {
-    const interval = Number(process.env.NTH_ORDER_INTERVAL) || 2;
+    const interval = Number(process.env.NTH_ORDER_INTERVAL) || 3;
 
     //For Discount on First Order Only
     if (interval === 1) {

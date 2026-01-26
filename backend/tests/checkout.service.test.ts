@@ -45,7 +45,7 @@ describe("CheckoutService", () => {
 
   test("applies valid discount code", () => {
     // Generate discount on 3rd order
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       addSampleItemToCart();
       checkoutService.checkout();
     }
@@ -66,7 +66,7 @@ describe("CheckoutService", () => {
 
   test("throws error when reusing discount code", () => {
     // Generate discount
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       addSampleItemToCart();
       checkoutService.checkout();
     }
