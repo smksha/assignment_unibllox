@@ -1,16 +1,23 @@
 import { Link } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "../../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Header() {
   const { cartItems } = useCart();
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const navigate = useNavigate();
 
   return (
     <header className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo / Brand */}
-        <div className="text-xl font-bold text-gray-800">Uniblox Store</div>
+        <div
+          className="text-xl font-bold text-gray-800 cursor-pointer"
+          onClick={() => navigate("/")}
+        >
+          Uniblox Store
+        </div>
 
         {/* Cart */}
         <Link to="/cart" className="relative">
