@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { checkoutService } from "../services/checkout.service";
 
 const router = Router();
@@ -6,7 +6,7 @@ const router = Router();
 /**
  * POST /checkout
  */
-router.post("/", (req, res) => {
+router.post("/", (req: Request, res: Response) => {
   try {
     const { discountCode } = req.body;
     const order = checkoutService.checkout(discountCode);
