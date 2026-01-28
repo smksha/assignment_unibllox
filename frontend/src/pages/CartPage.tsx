@@ -49,6 +49,20 @@ export default function CartPage() {
   // 10% discount
   const finalPrice = totalPrice - discountAmount;
 
+  //handle checkout
+  const handleCheckout = async () => {
+    setLoading(true);
+    try {
+      await checkout(discountApplied ? discountCode! : undefined);
+      alert("Checkout successful!");
+      navigate("/");
+    } catch (error) {
+      alert("Checkout failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="p-4 space-y-4">
       <button
@@ -119,18 +133,7 @@ export default function CartPage() {
       <button
         disabled={cartItems.length === 0 || loading}
         className="w-full py-2 bg-blue-600 text-white rounded"
-        onClick={async () => {
-          try {
-            setLoading(true);
-            await checkout(discountApplied ? discountCode! : undefined);
-            alert("Order placed successfully");
-            window.location.reload();
-          } catch (err: any) {
-            alert(err.message);
-          } finally {
-            setLoading(false);
-          }
-        }}
+        onClick={handleCheckout}
       >
         Checkout
       </button>

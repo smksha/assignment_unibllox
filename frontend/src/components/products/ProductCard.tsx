@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useCart } from "../../context/CartContext";
 
 type Props = {
@@ -15,20 +16,23 @@ export default function ProductCard({
   price,
   thumbnail,
 }: Props) {
+  const [adding, setAdding] = useState(false);
   const { addToCart } = useCart();
 
-  const handleAddToCart = () => {
-    const product = {
+  const handleAddToCart = async () => {
+    setAdding(true);
+
+    addToCart({
       id,
       title,
-      description,
       price,
-      thumbnail,
       quantity: 1,
-    };
+      thumbnail,
+    });
 
-    //console.log("Product added to cart:", product); //TO DO : remove this line later
-    addToCart(product);
+    setTimeout(() => {
+      setAdding(false);
+    }, 300); // small UX delay
   };
 
   return (
@@ -43,9 +47,12 @@ export default function ProductCard({
       <p className="mt-2 font-bold text-black">₹{price}</p>
       <button
         onClick={handleAddToCart}
-        className="mt-2 px-3 py-1 bg-blue-600 text-white rounded"
+        disabled={adding}
+        className={`mt-2 px-3 py-1 rounded text-white ${
+          adding ? "bg-gray-400" : "bg-blue-600"
+        }`}
       >
-        Add to cart
+        {adding ? "Adding..." : "Add to cart"}
       </button>
     </div>
   );
