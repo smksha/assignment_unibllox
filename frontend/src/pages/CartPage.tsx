@@ -13,7 +13,8 @@ export default function CartPage() {
   const [orderNumber, setOrderNumber] = useState<number | null>(null);
   const [discountMessage, setDiscountMessage] = useState<string | null>(null);
 
-  const { cartItems, addToCart, removeFromCart, getTotalPrice } = useCart();
+  const { cartItems, addToCart, removeFromCart, getTotalPrice, clearCart } =
+    useCart();
 
   const navigate = useNavigate();
   const DISCOUNT_PERCENT = Number(import.meta.env.VITE_DISCOUNT_PERCENT);
@@ -55,6 +56,7 @@ export default function CartPage() {
     try {
       await checkout(discountApplied ? discountCode! : undefined);
       alert("Checkout successful!");
+      clearCart();
       navigate("/");
     } catch (error) {
       alert("Checkout failed. Please try again.");
